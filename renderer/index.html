@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'">
+<title>Claude TV</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body data-theme="light" data-view="overview">
+
+<div class="frame">
+
+  <header class="titlebar">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text">Claude TV</span>
+    <span class="pill" id="pill-plan" hidden></span>
+
+    <div class="titlebar-actions">
+      <button type="button" class="btn" data-act="view" title="Ansicht wechseln (D)">Details</button>
+      <button type="button" class="btn" data-act="theme" title="Farbschema (T)">System</button>
+      <button type="button" class="btn" data-act="pin" title="Immer im Vordergrund (P)">Pin</button>
+      <button type="button" class="btn btn--sq" data-act="help" title="Was bedeuten die Zahlen? (H)">?</button>
+      <button type="button" class="btn btn--sq" data-act="minimize" title="Minimieren">&#8211;</button>
+      <button type="button" class="btn btn--sq btn--close" data-act="close" title="Schliessen">&#10005;</button>
+    </div>
+  </header>
+
+  <main class="stage">
+
+    <!-- ---------------- Übersicht ---------------- -->
+    <section class="view view--overview">
+
+      <div class="col-left">
+        <div id="clawd"></div>
+        <p class="clawd-caption" id="clawd-caption"></p>
+      </div>
+
+      <div class="col-right">
+
+        <div class="panel panel--main">
+          <div class="panel-head">
+            <span class="panel-title">5-Stunden-Fenster</span>
+            <span class="panel-note" id="window-reset"></span>
+          </div>
+
+          <div class="readout">
+            <span class="readout-value" id="window-percent">--</span>
+            <span class="readout-unit" id="window-unit">%</span>
+            <span class="readout-aside" id="window-aside"></span>
+          </div>
+
+          <div class="bar" id="window-bar">
+            <div class="bar-marks">
+              <span class="bar-clock"><i></i><b>Uhr</b></span>
+            </div>
+            <div class="bar-blocks" id="window-blocks"></div>
+          </div>
+
+          <p class="panel-line" id="window-line"></p>
+        </div>
+
+        <div class="panel panel--week">
+          <div class="panel-head">
+            <span class="panel-title">Letzte 7 Tage</span>
+            <span class="panel-note" id="week-note"></span>
+          </div>
+          <div class="bar bar--slim" id="week-bar" data-clock="none">
+            <div class="bar-blocks" id="week-blocks"></div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-value" id="rate-value">--</span>
+            <span class="stat-label">Tokens pro Minute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="today-value">--</span>
+            <span class="stat-label">Verbrauch heute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="sessions-value">--</span>
+            <span class="stat-label">Sitzungen heute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="model-value">--</span>
+            <span class="stat-label">Zuletzt aktiv</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---------------- Details ---------------- -->
+    <section class="view view--detail">
+      <div class="cards">
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Woraus der Verbrauch besteht</span>
+            <span class="panel-note">im laufenden Fenster</span>
+          </div>
+          <div class="bar bar--stack" data-clock="none">
+            <div class="bar-blocks" id="comp-blocks"></div>
+          </div>
+          <div class="legend" id="comp-legend" style="margin-top: 10px;"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Modelle</span>
+            <span class="panel-note">gesamt</span>
+          </div>
+          <div class="legend" id="rows-models"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Projekte</span>
+            <span class="panel-note">gesamt</span>
+          </div>
+          <div class="legend" id="rows-projects"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Verlauf</span>
+            <span class="panel-note">Fenster und Tag</span>
+          </div>
+          <div class="spark" id="spark-window"></div>
+          <div class="spark-axis">
+            <span id="spark-from"></span>
+            <span id="spark-to"></span>
+          </div>
+          <div class="spark spark--day" id="spark-day"></div>
+          <div class="spark-axis"><span>0 Uhr</span><span>12</span><span>24</span></div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <span id="foot-scale"></span>
+    <span id="foot-source"></span>
+  </footer>
+
+</div>
+
+<!-- ---------------- Hilfe ---------------- -->
+<div class="overlay" id="help" hidden>
+  <div class="panel panel--help">
+    <div class="panel-head">
+      <span class="panel-title">Was die Zahlen bedeuten</span>
+      <button type="button" class="btn btn--sq" data-act="help-close">&#10005;</button>
+    </div>
+
+    <dl class="help-list">
+      <dt>Verbrauch</dt>
+      <dd>Eingabe plus Antwort plus neu angelegter Cache. Das ist die Zahl, die
+        auf dein Kontingent geht. Wiederverwendeter Cache steht getrennt, er ist
+        der billige Teil und würde sonst alles andere erdrücken.</dd>
+
+      <dt>5-Stunden-Fenster</dt>
+      <dd>Claude Code rechnet in Fenstern von fünf Stunden ab der ersten
+        Nachricht. Dieses Programm erkennt die Fenster aus den Zeitstempeln in
+        deinen Logs und zählt bis zum Reset herunter.</dd>
+
+      <dt>Die Marke „Uhr"</dt>
+      <dd>Der Balken zeigt deinen Verbrauch, die Marke zeigt, wie viel Zeit des
+        Fensters schon vorbei ist. Balken links von der Marke heißt: du
+        verbrauchst langsamer als die Zeit läuft, du hast Luft. Balken rechts
+        davon heißt: in diesem Tempo bist du vor dem Reset am Anschlag.</dd>
+
+      <dt>Die Prozente</dt>
+      <dd>Selbst kalibriert. Wie viel du wirklich darfst, steht in keiner
+        lokalen Datei. 100 Prozent ist deshalb dein eigenes p90-Fenster: der
+        Wert, den 9 von 10 deiner abgeschlossenen Fenster nicht überschreiten.
+        Die Fußzeile schreibt immer hin, was gerade als 100 Prozent gilt.</dd>
+
+      <dt>Letzte 7 Tage</dt>
+      <dd>Ein rollendes Fenster, keine Kalenderwoche. Wann dein echtes
+        Wochenlimit zurücksetzt, ist lokal nicht bekannt.</dd>
+
+      <dt>Was fehlt</dt>
+      <dd>Nur Claude Code ist hier zu sehen. Deine Chats auf claude.ai und in
+        der Desktop-App stehen in diesen Logs nicht.</dd>
+    </dl>
+
+    <p class="help-foot">H oder Escape schließt dieses Fenster.</p>
+  </div>
+</div>
+
+<script src="character.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

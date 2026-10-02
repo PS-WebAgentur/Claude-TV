@@ -32,8 +32,13 @@ jobs:
 
       # Baut genau die drei Ziele aus package.json: Installer fuer beide
       # Architekturen, Zip fuer ARM64, portable Einzeldatei fuer x64.
+      #
+      # --publish never ist noetig: bei einem Tag will electron-builder von
+      # sich aus veroeffentlichen und verlangt dafuer ein Token. Hochgeladen
+      # wird hier aber im naechsten Schritt, und zwar mit dem Token, das der
+      # Workflow ohnehin hat.
       - name: Alle Ziele bauen
-        run: npm run dist
+        run: npm run dist -- --publish never
 
       - name: An die Veroeffentlichung haengen
         if: startsWith(github.ref, 'refs/tags/')

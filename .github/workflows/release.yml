@@ -30,20 +30,18 @@ jobs:
       - name: Pruefungen
         run: npm run selftest
 
-      - name: Installer bauen
-        run: npm run dist:installer
-
-      - name: Portable und Zip bauen
-        run: npx electron-builder --win zip portable --arm64 --x64
+      # Baut genau die drei Ziele aus package.json: Installer fuer beide
+      # Architekturen, Zip fuer ARM64, portable Einzeldatei fuer x64.
+      - name: Alle Ziele bauen
+        run: npm run dist
 
       - name: An die Veroeffentlichung haengen
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/Claude TV Setup.exe
-            dist/Claude TV arm64.zip
-            dist/Claude TV x64.exe
+            dist/*.exe
+            dist/*.zip
           body: |
             Windows-Installer fuer x64 und ARM64 in einer Datei.
             Doppelklick genuegt, kein Administrator noetig.

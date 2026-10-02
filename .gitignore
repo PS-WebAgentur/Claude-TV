@@ -1,0 +1,20 @@
+# Abhaengigkeiten und Bauergebnisse
+node_modules/
+dist/
+
+# wird von tools/vendor-fonts.mjs erzeugt
+vendor/
+
+# wird von tools/make-icon.mjs erzeugt
+build/icon.png
+build/tray-preview.png
+
+# eigene Einstellungen, falls jemand die App aus dem Projektordner startet
+claude-tv.config.json
+
+# Betriebssystem und Editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

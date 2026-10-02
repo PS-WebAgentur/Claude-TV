@@ -1,0 +1,97 @@
+{
+  "name": "claude-tv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lokale Anzeige fuer den eigenen Claude-Code-Verbrauch / Local usage display for Claude Code",
+  "type": "module",
+  "main": "main.mjs",
+  "scripts": {
+    "start": "node tools/vendor-fonts.mjs && electron .",
+    "dev": "node tools/vendor-fonts.mjs && electron . --dev",
+    "serve": "node tools/vendor-fonts.mjs && node dev/serve.mjs",
+    "selftest": "node tools/selftest.mjs",
+    "icon": "node tools/make-icon.mjs",
+    "dist": "node tools/vendor-fonts.mjs && node tools/make-icon.mjs && electron-builder --win",
+    "fonts": "node tools/vendor-fonts.mjs",
+    "dist:dir": "node tools/vendor-fonts.mjs && node tools/make-icon.mjs && electron-builder --win dir",
+    "dist:installer": "node tools/vendor-fonts.mjs && node tools/make-icon.mjs && electron-builder --win nsis --x64 --arm64"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "shop.vibetv.claude-tv",
+    "productName": "Claude TV",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.mjs",
+      "preload.cjs",
+      "lib/**/*",
+      "renderer/**/*",
+      "vendor/**/*",
+      "LICENSE",
+      "THIRD-PARTY-NOTICES.md"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "Claude TV ${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "Claude TV",
+      "artifactName": "Claude TV Setup.${ext}"
+    }
+  },
+  "author": "Philipp Sobotta",
+  "license": "MIT",
+  "homepage": "https://github.com/PS-WebAgentur/Claude-TV",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PS-WebAgentur/Claude-TV.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PS-WebAgentur/Claude-TV/issues"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "usage",
+    "electron",
+    "desktop",
+    "windows",
+    "tokens"
+  ]
+}

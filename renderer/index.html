@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'">
+<title>Claude TV</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body data-theme="light" data-view="overview">
+
+<div class="frame">
+
+  <header class="titlebar">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text">Claude TV</span>
+    <span class="pill" id="pill-plan" hidden></span>
+
+    <div class="titlebar-actions">
+      <button type="button" class="btn" data-act="view" data-i18n-title="bar.view.title">Details</button>
+      <button type="button" class="btn" data-act="theme" data-i18n-title="bar.theme.title">System</button>
+      <button type="button" class="btn" data-act="pin" data-i18n="bar.pin" data-i18n-title="bar.pin.title">Anheften</button>
+      <button type="button" class="btn" data-act="lang" data-i18n-title="bar.lang.title">DE</button>
+      <button type="button" class="btn" data-act="sync" data-i18n="bar.sync" data-i18n-title="bar.sync.title">Abgleich</button>
+      <button type="button" class="btn btn--sq" data-act="help" data-i18n-title="bar.help.title">?</button>
+      <button type="button" class="btn btn--sq" data-act="minimize" data-i18n-title="bar.minimize">&#8211;</button>
+      <button type="button" class="btn btn--sq btn--close" data-act="close" data-i18n-title="bar.close">&#10005;</button>
+    </div>
+  </header>
+
+  <main class="stage">
+
+    <!-- ---------------- Übersicht ---------------- -->
+    <section class="view view--overview">
+
+      <div class="col-left">
+        <div id="clawd"></div>
+        <p class="clawd-caption" id="clawd-caption"></p>
+        <p class="clawd-work" id="clawd-work"></p>
+      </div>
+
+      <div class="col-right">
+
+        <div class="panel panel--main">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="window.title">5-Stunden-Fenster</span>
+            <span class="panel-note" id="window-reset"></span>
+          </div>
+
+          <div class="readout">
+            <span class="readout-value" id="window-percent">--</span>
+            <span class="readout-unit" id="window-unit">%</span>
+            <span class="readout-aside" id="window-aside"></span>
+          </div>
+
+          <div class="bar" id="window-bar">
+            <div class="bar-marks">
+              <span class="bar-clock"><i></i><b data-i18n="window.target">Ziel</b></span>
+            </div>
+            <div class="bar-blocks" id="window-blocks"></div>
+          </div>
+
+          <p class="panel-line" id="window-line"></p>
+          <p class="panel-line panel-line--small" id="window-limits" hidden></p>
+        </div>
+
+        <div class="panel panel--week">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="week.title">Letzte 7 Tage</span>
+            <span class="panel-note" id="week-note"></span>
+            <span class="panel-note" id="week-reset"></span>
+          </div>
+          <div class="bar bar--slim" id="week-bar" data-clock="none">
+            <div class="bar-blocks" id="week-blocks"></div>
+          </div>
+          <p class="panel-line panel-line--small" id="scoped-line" hidden></p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-value" id="rate-value">--</span>
+            <span class="stat-label" data-i18n="stat.rate">Tokens pro Minute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="today-value">--</span>
+            <span class="stat-label" data-i18n="stat.today">Verbrauch heute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="sessions-value">--</span>
+            <span class="stat-label" data-i18n="stat.sessions">Sitzungen heute</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="model-value">--</span>
+            <span class="stat-label" data-i18n="stat.model">Zuletzt aktiv</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---------------- Details ---------------- -->
+    <section class="view view--detail">
+      <div class="cards">
+
+        <article class="panel panel--wide">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.work">Woran gearbeitet wird</span>
+            <span class="panel-note" id="work-project"></span>
+          </div>
+          <p class="work-git" id="work-git"></p>
+          <div class="work-steps" id="work-steps"></div>
+          <div class="work-files" id="work-files"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.composition">Woraus der Verbrauch besteht</span>
+            <span class="panel-note" data-i18n="card.composition.note">im laufenden Fenster</span>
+          </div>
+          <div class="bar bar--stack" data-clock="none">
+            <div class="bar-blocks" id="comp-blocks"></div>
+          </div>
+          <div class="legend" id="comp-legend" style="margin-top: 10px;"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.models">Modelle</span>
+            <span class="panel-note" data-i18n="card.total">gesamt</span>
+          </div>
+          <div class="legend" id="rows-models"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.projects">Projekte</span>
+            <span class="panel-note" data-i18n="card.total">gesamt</span>
+          </div>
+          <div class="legend" id="rows-projects"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.history">Verlauf</span>
+            <span class="panel-note" data-i18n="card.history.note">Fenster und Tag</span>
+          </div>
+          <div class="spark" id="spark-window"></div>
+          <div class="spark-axis">
+            <span id="spark-from"></span>
+            <span id="spark-to"></span>
+          </div>
+          <div class="spark spark--day" id="spark-day"></div>
+          <div class="spark-axis"><span>0 Uhr</span><span>12</span><span>24</span></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.kinds">Wohin der Verbrauch geht</span>
+            <span class="panel-note" data-i18n="card.total">gesamt</span>
+          </div>
+          <div class="bar bar--stack" data-clock="none">
+            <div class="bar-blocks" id="kind-blocks"></div>
+          </div>
+          <div class="legend" id="rows-kinds" style="margin-top: 10px;"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.windows">Fenster im Vergleich</span>
+            <span class="panel-note" data-i18n="card.windows.note">die letzten 14</span>
+          </div>
+          <div class="spark spark--history" id="spark-history"></div>
+          <p class="panel-line panel-line--small" id="history-note"></p>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.days">Die Woche</span>
+            <span class="panel-note" data-i18n="card.days.note">pro Tag</span>
+          </div>
+          <div class="days" id="days"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.cache">Cache-Wiederverwendung</span>
+            <span class="panel-note" data-i18n="card.cache.note">gesamt und im Fenster</span>
+          </div>
+          <div class="duo">
+            <div class="duo-cell">
+              <span class="duo-value" id="cache-all">--</span>
+              <span class="duo-label" data-i18n="card.cache.all">insgesamt</span>
+            </div>
+            <div class="duo-cell">
+              <span class="duo-value" id="cache-window">--</span>
+              <span class="duo-label" data-i18n="card.cache.window">laufendes Fenster</span>
+            </div>
+          </div>
+          <p class="panel-line panel-line--small" data-i18n="card.cache.hint"></p>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.sessions">Größte Sitzungen heute</span>
+            <span class="panel-note" data-i18n="card.sessions.note">ohne Subagenten</span>
+          </div>
+          <div class="legend" id="rows-sessions"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.cost">Über die API gerechnet</span>
+            <span class="panel-note" data-i18n="card.cost.note">Schätzung zu Listenpreisen</span>
+          </div>
+          <div class="duo duo--three">
+            <div class="duo-cell">
+              <span class="duo-value" id="cost-window">--</span>
+              <span class="duo-label" data-i18n="card.cost.window">laufendes Fenster</span>
+            </div>
+            <div class="duo-cell">
+              <span class="duo-value" id="cost-today">--</span>
+              <span class="duo-label" data-i18n="card.cost.today">heute</span>
+            </div>
+            <div class="duo-cell">
+              <span class="duo-value" id="cost-week">--</span>
+              <span class="duo-label" data-i18n="card.cost.week">sieben Tage</span>
+            </div>
+          </div>
+          <p class="panel-line panel-line--small" data-i18n="card.cost.hint"></p>
+        </article>
+
+        <article class="panel panel--wide">
+          <div class="panel-head">
+            <span class="panel-title" data-i18n="card.heat">Wann du arbeitest</span>
+            <span class="panel-note" data-i18n="card.heat.note">vier Wochen</span>
+          </div>
+          <div class="heat" id="heat"></div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <span id="foot-scale"></span>
+    <span id="foot-source"></span>
+  </footer>
+
+</div>
+
+<!-- ---------------- Hilfe ---------------- -->
+<div class="overlay" id="help" hidden>
+  <div class="panel panel--help">
+    <div class="panel-head">
+      <span class="panel-title" data-i18n="help.title">Was die Zahlen bedeuten</span>
+      <button type="button" class="btn btn--sq" data-act="help-close">&#10005;</button>
+    </div>
+
+    <dl class="help-list" id="help-list"></dl>
+
+    <p class="help-foot" data-i18n="help.foot"></p>
+  </div>
+</div>
+
+<!-- ---------------- Abgleich ---------------- -->
+<div class="overlay" id="sync" hidden>
+  <div class="panel panel--help">
+    <div class="panel-head">
+      <span class="panel-title" data-i18n="sync.title">Mit Claude Code abgleichen</span>
+      <button type="button" class="btn btn--sq" data-act="sync-close">&#10005;</button>
+    </div>
+
+    <p class="sync-intro" data-i18n-html="sync.intro"></p>
+
+    <textarea id="sync-input" class="sync-input" spellcheck="false"
+              placeholder="Claude Code usage report (…)&#10;&#10;Plan limits:&#10;- session-0: 56% (resets …)"></textarea>
+
+    <div class="sync-actions">
+      <button type="button" class="btn" data-act="sync-apply" data-i18n="sync.apply">Übernehmen</button>
+      <span class="sync-status" id="sync-status"></span>
+    </div>
+
+    <p class="help-foot" data-i18n="sync.foot"></p>
+  </div>
+</div>
+
+<script src="character.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

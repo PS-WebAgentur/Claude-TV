@@ -1,0 +1,60 @@
+# Baut den Installer und haengt ihn an eine Veroeffentlichung.
+#
+# Laeuft bei einem Tag der Form v1.2.3 und auf Knopfdruck. Windows-Runner,
+# weil electron-builder fuer einen NSIS-Installer Windows braucht.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Abhaengigkeiten
+        run: npm ci
+
+      - name: Pruefungen
+        run: npm run selftest
+
+      - name: Installer bauen
+        run: npm run dist:installer
+
+      - name: Portable und Zip bauen
+        run: npx electron-builder --win zip portable --arm64 --x64
+
+      - name: An die Veroeffentlichung haengen
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Claude TV Setup.exe
+            dist/Claude TV arm64.zip
+            dist/Claude TV x64.exe
+          body: |
+            Windows-Installer fuer x64 und ARM64 in einer Datei.
+            Doppelklick genuegt, kein Administrator noetig.
+
+            Der Installer ist nicht signiert: SmartScreen meldet sich beim
+            ersten Start, "Weitere Informationen" fuehrt zu "Trotzdem
+            ausfuehren".
+
+      - name: Ergebnis aufheben
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-tv-windows
+          path: dist/*.exe
+          retention-days: 14
